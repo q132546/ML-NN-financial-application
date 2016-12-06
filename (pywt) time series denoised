@@ -1,0 +1,46 @@
+import numpy as np
+import pywt
+
+def pywave(index,wavefunction,lv,m,n):
+    """
+
+    :param index: 待處理的時間序列
+    :param dataframe: 消噪後的序列放置處
+    :param wavefunction: 選用的小波分析函數
+    :param lv: 分解層數
+    :param m,n: 決定閾值處理時的係數層數
+    :return:
+    """
+    coeff = pywt.wavedec(index,wavefunction,mode = 'sym',level = lv)
+    """
+    :param index: 待處理的時間序列
+    :param wavefunction: 選用的小波分析函數
+    :param mode:symmetric
+    :param lv: 分解層數
+
+    :return cA cD: cA=尺度係數 cD=小波係數
+    """
+
+    def check(x):
+        if x > 0:
+            x = 1
+        else:
+            x = -1
+
+    #選取小波係數(m,n)層
+    for i in range(m , n + 1):
+        cD = coeff[i]
+
+        #閾值決定準則 sqtwolog ＝ sqrt(2*log(n))
+        tr = np.sqrt(2 * np.log(len(cD)))
+
+        for j in range(len(cD)):
+            if cD[j] >= tr:
+                coeff[i][j] = check(cD[j]) - tr
+            else:
+                coeff[i][j] = 0
+
+    #重構
+    denoised_index = pywt.waverec(coeff,wavefunction)
+
+    return denoised_index
