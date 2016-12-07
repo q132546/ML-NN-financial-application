@@ -1,0 +1,43 @@
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+
+def randomforestfeature_selection(feat_labels, x_train,y_train, n, threshold):
+    """
+
+    :param feat_labels: 每個特徵因子名稱
+    :param x_train: 訓練集
+    :param y_train: 特徵集
+    :param n: the number of decision trees in random forest
+    :return:
+    """
+    forest = RandomForestClassifier(n_estimators=n,random_state=0,n_jobs=-1)
+    forest.fit(x_train, y_train)
+    importance = forest.feature_importances_
+    indices = np.argsort(importance)[::-1]   #排序陣列
+    for f in range(x_train.shape[1]):
+        print("%d. feature %-*s (%f)" % (f + 1, feat_labels[indices[f]], importance[indices[f]]))
+
+    selection(feat_labels, x_train, importance, indices, threshold)
+
+
+
+#挑出最重要的前幾名因子
+
+def selection(feat_labels, x_train, importance, indices, threshold):
+    """
+
+    :param feat_labels: 每個特徵因子名稱
+    :param x_train: 訓練集
+    :param importance:
+    :param indices: importance的排序陣列
+    :param threshold: 決定重要特徵值的判定
+    :return:
+    """
+    x_selected = np.empty(0)
+    label_selected = []
+    for f in range(x_train.shape[1]):
+        if importance[indices[f]] > threshold:
+            x_selected.append(x_selected, importance[indices[f]])
+            label_selected.append(feat_labels[indices[f]])
+
+    return x_selected, label_selected
